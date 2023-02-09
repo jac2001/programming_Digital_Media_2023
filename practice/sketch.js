@@ -7,13 +7,13 @@ let green;
 let walkingAnimation2;
 let warrior;
 
-let spriteSheetFilenames = ['SpelunkGuy.png', 'Green.png', 'jungleWarrior.png']
+let spriteSheetFilenames = ['SpelunkyGuy.png', 'Green.png', 'jungleWarrior.png']
 let spriteSheets = [];
-let totalAnimations = 5;
+let totalAnimations = 100;
 let animations = []
 
 function preload() {
-  for(let i = 0;i < spriteSheetFilenames/length;i++){
+  for(let i = 0;i < spriteSheetFilenames.length;i++){
     spriteSheets[i] = loadImage("assets/" + spriteSheetFilenames[i]);
   }
 }
@@ -21,9 +21,10 @@ function preload() {
 function setup() {
   createCanvas(400, 400);
   imageMode(CENTER);
+  angleMode(DEGREES);
 
   for(let i = 0; i < totalAnimations; i++){
-    animations[i] = WalkingAnimation(random(spriteSheets),80,80,random(100,300),random(100,300),9);
+    animations[i] = new WalkingAnimation(random(spriteSheets),80,80,random(100,300),random(100,300),9,random(0.5,1), 6);
   }
 
 }
@@ -37,26 +38,25 @@ function draw() {
   }
 
 }
-
-function keyPressed() {
-  walkingAnimation.keyPressed(RIGHT_ARROW,LEFT_ARROW);
-  walkingAnimation2.keyPressed(LEFT_ARROW,RIGHT_ARROW);
-  green.keyPressed(LEFT_ARROW,RIGHT_ARROW);
-  
-  jungleWarrior.keyPressed(RIGHT_ARROW, LEFT_ARROW);
-
+function mousePressed() {
+  for (let i=0; i < animations.length; i++) {
+    let contains = animations[i].contains(mouseX,mouseY);
+    if (contains) {
+      if (animations[i].moving != 0)
+        animations[i].stop();
+      else {
+        if (animations[i].xDirection === 1)
+          animations[i].moveRight();
+        else
+          animations[i].moveLeft();
+      }
+    }
+  }
 }
 
-function keyReleased() {
-  walkingAnimation.keyReleased(RIGHT_ARROW,LEFT_ARROW);
-  walkingAnimation2.keyReleased(LEFT_ARROW,RIGHT_ARROW);
-  green.keyReleased(LEFT_ARROW,RIGHT_ARROW);
-  //chronoAnimation.keyReleased(RIGHT_ARROW,LEFT_ARROW);
-  jungleWarrior.keyReleased(RIGHT_ARROW, LEFT_ARROW);
-}
 
 class WalkingAnimation {
-  constructor(spritesheet, sw, sh, dx, dy, animationLength, offsetX = 0, offsetY = 0) {
+  constructor(spritesheet, sw, sh, dx, dy, animationLength, speed, framerate, offsetX = 0, offsetY = 0) {
     this.spritesheet = spritesheet;
     this.sw = sw;
     this.sh = sh;
@@ -66,41 +66,66 @@ class WalkingAnimation {
     this.v = 0;
     this.animationLength = animationLength;
     this.currentFrame = 0;
-    this.moving = 0;
+    this.moving = 1;
     this.xDirection = 1;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
+    this.speed = speed;
+    this.framerate = framerate*speed;
   }
 
   draw() {
 
-    // if (this.moving != 0)
-    //   this.u = this.currentFrame % this.animationLength;
-    // else
-    //   this.u = 0;
+   
 
     this.u = (this.moving != 0) ? this.currentFrame % this.animationLength : 0;
     push();
     translate(this.dx,this.dy);
     scale(this.xDirection,1);
   
+
+    rect(-26,-35,50,70);
+
     image(this.spritesheet,0,0,this.sw,this.sh,this.u*this.sw+this.offsetX,this.v*this.sh+this.offsetY,this.sw,this.sh);
     pop();
-    if (frameCount % 6 == 0) {
+
+    let proportionalFramerate = round(frameRate() / this.framerate);
+    if (frameCount % proportionalFramerate == 0) {
       this.currentFrame++;
     }
   
-    this.dx += this.moving;
+    this.dx += this.moving * this.speed;
+
+    if (this.dx > width - this.sw / 4)
+    {
+      this.moveLeft();
+
+    }
+    else if (this.dx < this.sw / 4){
+      this.moveRight();
+    }
+
+
+
+  }
+
+  moveRight(){
+    this.moving = 1;
+    this.xDirection = 1;
+  }
+
+  moveLeft(){
+    this.moving = -1;
+    this.xDirection = -1;
+
   }
 
   keyPressed(right, left) {
     if (keyCode === right) {
-      this.moving = 1;
-      this.xDirection = 1;
+      
       this.currentFrame = 1;
     } else if (keyCode === left) {
-      this.moving = -1;
-      this.xDirection = -1;
+      
       this.currentFrame = 1;
     }
   }
@@ -110,4 +135,15 @@ class WalkingAnimation {
       this.moving = 0;
     }
   }
+  contains(x,y) {
+    //rect(-26,-35,50,70);
+    let insideX = x >= this.dx - 26 && x <= this.dx + 25;
+    let insideY = y >= this.dy - 35 && y <= this.dy + 35;
+    return insideX && insideY;
+  }
+
+  stop() {
+    this.moving = 0;
+  }
+
 }
