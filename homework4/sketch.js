@@ -1,15 +1,6 @@
-let spriteSheet;
-let greenSheet;
-let jungleWarriorSheet;
-
-let walkingAnimation;
-let green;
-let walkingAnimation2;
-let warrior;
-
-let spriteSheetFilenames = ['SpelunkyGuy.png', 'Green.png', 'jungleWarrior.png'];
-let spriteSheets = [];
-let animations = [];
+let bugImage;
+let bugAnimation;
+let deadBugImage;
 
 const GameState = {
   Start: "Start",
@@ -17,12 +8,14 @@ const GameState = {
   GameOver: "GameOver"
 };
 
-let game = {score: 0, maxScore: 0, maxTime: 10, elapsedTime: 0, totalSprites: 15, state: GameState.Start, targetSprite: 2};
+let game = {score: 0, maxScore: 0, maxTime: 30, elapsedTime: 0, totalSprites: 100, state: GameState.Start};
 
 function preload() {
-  for(let i = 0;i < spriteSheetFilenames.length;i++){
-    spriteSheets[i] = loadImage("assets/" + spriteSheetFilenames[i]);
-  }
+  
+    bugImage = loadImage("assets/Bug.png");
+    deadBugImage = loadImage("assets/DeadBug.png")
+
+  
 }
 
 function setup() {
@@ -36,26 +29,29 @@ function setup() {
 function reset(){
   game.elapsedTime = 0;
   game.score = 0;
-  game.totalSprites = random(10,30);
+  game.totalSprites = random(10,100);
 
-  animations = []
-  for(let i = 0; i < game.totalSprites; i++){
-    animations[i] = new WalkingAnimation(random(spriteSheets),80,80,random(100,300),random(100,300),9,random(0.5,1), 6, random([0,1]));
+  animations = [];
+  for(let i=0; i < game.totalSprites; i++) {
+    animations[i] = new CreateBug(bugImage,32,32,random(100,300),random(100,300),4,random(0.5,1), 6, random([0,1]));
   }
+  
+  
 }
 
 function draw() {
   switch(game.state){
     case GameState.Playing:
       background(220);
-      for(let i = 0; i < animations.length; i++){
+      
+      for(let i=0; i < animations.length; i++) {
         animations[i].draw();
       }
       fill(0);
-      textSize(40);
-      text(game.score, 20, 40);
+      textSize(15);
+      text("Bug Count: " + game.score, 50, 50);
       let currentTime = game.maxTime - game.elapsedTime;
-      text(ceil(currentTime), 300, 40);
+      text("Time Left: " + ceil(currentTime), 40, 75);
       game.elapsedTime += deltaTime / 1000;
     
       if (currentTime < 0 ){
@@ -70,15 +66,15 @@ function draw() {
       textAlign(CENTER);
       text("Game Over!",200,200);
       textSize(35);
-      text("Score: " + game.score, 200, 270);
+      text("Bug Count: " + game.score, 200, 270);
       text("Max Score: " + game.maxScore, 200, 320);
       break;
     case GameState.Start:
       background(0);
       fill(255);
-      textSize(50);
+      textSize(40);
       textAlign(CENTER);
-      text("Jungle Warrior Game",200,200);
+      text("Bug Squish Game",200,200);
       textSize(30);
       text("Press any Key to Start", 200,300);
       break;
@@ -108,24 +104,27 @@ function mousePressed() {
         if (contains) {
           if (animations[i].moving != 0)
           {
-             animations[i].stop();
-             if (animations[i].spritesheet == spriteSheets[game.targetSprite])
+            animations[i].stop();
+             if (animations[i])
              {
+           
             game.score += 1;
+            animations[i] = new CreateBug(deadBugImage,32,32,random(100,300),random(100,300),1,random(0.5,1), 6, random([0,1]));
              }
-             else{
+             else
+             {
               game.score -= 1;
 
              }
             }
       else {
         if (animations[i].xDirection === 1)
-          animations[i].moveRight();
+        animations[i].moveRight();
         else
-          animations[i].moveLeft();
+        animations[i].moveLeft();
       
       }
-    }
+        }
     }
       break;
     case GameState.GameOver:
@@ -135,9 +134,9 @@ function mousePressed() {
   }
 }
 
-class WalkingAnimation {
-  constructor(spritesheet, sw, sh, dx, dy, animationLength, speed, framerate, vertical = false, offsetX = 0, offsetY = 0) {
-    this.spritesheet = spritesheet;
+class CreateBug{
+  constructor(picture, sw, sh, dx, dy, animationLength, speed, framerate, vertical = false, offsetX = 0, offsetY = 0) {
+    this.picture = picture;
     this.sw = sw;
     this.sh = sh;
     this.dx = dx;
@@ -166,8 +165,8 @@ class WalkingAnimation {
     
    
     scale(this.xDirection,1);
-    //rect(-26,-35,50,70);
-    image(this.spritesheet,0,0,this.sw,this.sh,this.u*this.sw+this.offsetX,this.v*this.sh+this.offsetY,this.sw,this.sh);
+    
+    image(this.picture,0,0,this.sw,this.sh,this.u*this.sw+this.offsetX,this.v*this.sh+this.offsetY,this.sw,this.sh);
     pop();
 
     let proportionalFramerate = round(frameRate() / this.framerate);
@@ -183,11 +182,8 @@ class WalkingAnimation {
     {
     this.dx += this.moving * this.speed;
     this.move(this.dx, this.sw / 4, width - this.sw / 4);
-    }
-
-    
+    }    
   }
-
   move(position, lowerBounds, upperBounds){
     if (position > upperBounds)
     {
@@ -227,7 +223,7 @@ class WalkingAnimation {
     }
   }
   contains(x,y) {
-    //rect(-26,-35,50,70);
+    
     let insideX = x >= this.dx - 26 && x <= this.dx + 25;
     let insideY = y >= this.dy - 35 && y <= this.dy + 35;
     return insideX && insideY;
@@ -240,3 +236,4 @@ class WalkingAnimation {
   }
 
 }
+
