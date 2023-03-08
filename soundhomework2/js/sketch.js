@@ -1,3 +1,4 @@
+let img;
 const synth = new Tone.MonoSynth({
   frequency: 50,
   envelope:{
@@ -66,6 +67,10 @@ function setup(){
 
 function draw(){
   background(220);
+  if (img) {
+    img.resize(width, height);
+    image(img, 0, 0);
+  }
 }
 
 function keyPressed(){
@@ -75,4 +80,8 @@ function keyPressed(){
     synth.triggerAttackRelease(notePressed, "4n");
     
   
+}
+function mouseClicked() {
+  // Load the image when the canvas is clicked
+  img = loadImage("js/golfswing.png");
 }

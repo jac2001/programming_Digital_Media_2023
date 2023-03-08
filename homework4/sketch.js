@@ -110,6 +110,7 @@ function mousePressed() {
            
             game.score += 1;
             animations[i] = new CreateBug(deadBugImage,32,32,random(100,300),random(100,300),1,random(0.5,1), 6, random([0,1]));
+            animations[i].moving == 0;
              }
              else
              {
