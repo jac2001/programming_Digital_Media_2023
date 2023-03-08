@@ -57,8 +57,8 @@ function keyPressed() {
 
 function mouseClicked() {
   // Load the image when the canvas is clicked
-  img = loadImage("js/golfswing.png");
-  const freq = Math.random() * 500;
+  img = loadImage("js/doorbell.png");
+  const freq = 600;
   const dur = Math.random() * 0.5 + 0.1;
   synth.triggerAttackRelease(freq, dur);
 
