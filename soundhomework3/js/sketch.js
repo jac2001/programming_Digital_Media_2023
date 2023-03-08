@@ -43,21 +43,11 @@ const lfo = new Tone.LFO({
 noise.connect(noiseFilter);
 noiseFilter.connect(Synth.frequency);
 
-lfo.connect(noiseFilter.frequency);
-
-function keyPressed() {
-  if (keyCode === 32) {
-    console.log('spacebar pressed');
-    Tone.start();
-
-  }
-}
-
-
-
+lfo.connect(noiseFilter.frequency); 
 function mouseClicked() {
   // Load the image when the canvas is clicked
   img = loadImage("js/doorbell.png");
+  Tone.start();
   const freq = 600;
   const dur = Math.random() * 0.5 + 0.1;
   synth.triggerAttackRelease(freq, dur);
